@@ -10,6 +10,7 @@ public class SignsMenu {
     private TextField searchField;
     private VisualElement expandedSignContainer;
     private Label expandedSignLabel;
+    private Label expandedInfoLabel;
     private Label statsLabel;
     private ToggleButton learningToggle;
     private Button expandedButton;
@@ -37,6 +38,7 @@ public class SignsMenu {
 
     void InitExpandedSignContainer() {
         expandedSignLabel = new Label();
+        expandedInfoLabel = new Label();
         urlField = new TextField();
         Label urlLabel = new Label();
         urlLabel.text = "URL";
@@ -52,6 +54,7 @@ public class SignsMenu {
         deleteButton.clicked += DeleteExpanded;
         expandedSignContainer = new VisualElement();
         expandedSignContainer.Add(expandedSignLabel);
+        expandedSignContainer.Add(expandedInfoLabel);
         expandedSignContainer.Add(urlContainer);
         expandedSignContainer.Add(learningToggle);
         expandedSignContainer.Add(deleteButton);
@@ -114,6 +117,7 @@ public class SignsMenu {
             expandedButton.Clear();
         }
         expandedSignLabel.text = sign.word;
+        expandedSignLabel.text = $"Fluency level: {sign.StwFluencyLevel()}";
         button.text = "";
         urlField.value = sign.url;
         urlField.RegisterValueChangedCallback(OnUrlChanged);
