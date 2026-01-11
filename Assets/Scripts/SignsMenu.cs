@@ -69,7 +69,29 @@ public class SignsMenu {
     }
 
     void UpdateStats(List<Sign> statSigns) {
-        statsLabel.text = $"Signs: {statSigns.Count}, Learning: {nLearning(statSigns)}";
+        int wtsFluencyLevel0 = 0;
+        int stwFluencyLevel0 = 0;
+        int wtsFluencyLevel1_2 = 0;
+        int stwFluencyLevel1_2 = 0;
+        int wtsFluencyLevel3_4 = 0;
+        int stwFluencyLevel3_4 = 0;
+        int wtsFluencyLevel5Plus = 0;
+        int stwFluencyLevel5Plus = 0;
+        foreach (Sign sign in statSigns) {
+            switch (sign.FluencyLevel(true)) {
+                case 0:         wtsFluencyLevel0++; break;
+                case 1: case 2: wtsFluencyLevel1_2++; break;
+                case 3: case 4: wtsFluencyLevel3_4++; break;
+                default:        wtsFluencyLevel5Plus++; break;
+            }
+            switch (sign.FluencyLevel(false)) {
+                case 0:         stwFluencyLevel0++; break;
+                case 1: case 2: stwFluencyLevel1_2++; break;
+                case 3: case 4: stwFluencyLevel3_4++; break;
+                default:        stwFluencyLevel5Plus++; break;
+            }
+        }
+        statsLabel.text = $"Signs: {statSigns.Count}, Learning: {nLearning(statSigns)}, Fluency level: WTS 0={wtsFluencyLevel0}, 1-2={wtsFluencyLevel1_2}, 3-4={wtsFluencyLevel3_4}, 5+={wtsFluencyLevel5Plus}; STW 0={stwFluencyLevel0}, 1-2={stwFluencyLevel1_2}, 3-4={stwFluencyLevel3_4}, 5+={stwFluencyLevel5Plus}";
     }
 
     // Update is called once per frame
@@ -117,7 +139,7 @@ public class SignsMenu {
             expandedButton.Clear();
         }
         expandedSignLabel.text = sign.word;
-        expandedSignLabel.text = $"Fluency level: {sign.StwFluencyLevel()}";
+        expandedSignLabel.text = $"Fluency level: WTS={sign.FluencyLevel(true)} STW={sign.FluencyLevel(false)}";
         button.text = "";
         urlField.value = sign.url;
         urlField.RegisterValueChangedCallback(OnUrlChanged);

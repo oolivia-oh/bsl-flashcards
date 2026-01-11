@@ -38,11 +38,11 @@ public class Sign {
         return logGaps;
     }
 
-    public int StwFluencyLevel() {
+    public int FluencyLevel(List<long> correctTicks) {
         int fluencyLevel = 0;
         int nLevels = 10;
         int levelCountThreshold = 2;
-        List<float> logGaps = LogGaps(TickGaps(stwCorrectTicks));
+        List<float> logGaps = LogGaps(TickGaps(correctTicks));
         List<int> levels = new List<int>();
         for (int i = 0; i < nLevels; i++) {
             levels.Add(0);
@@ -60,16 +60,26 @@ public class Sign {
         return fluencyLevel;
     }
 
-    public long StwLevelUpWaitTime() {
+    public long LevelUpWaitTime(List<long> correctTicks) {
         long waitTime = 0;
-        if (stwCorrectTicks.Count > 1) {
-            long gap = DateTime.Now.Ticks/10000000 - stwCorrectTicks[stwCorrectTicks.Count-1];
+        if (correctTicks.Count > 1) {
+            long gap = DateTime.Now.Ticks/10000000 - correctTicks[correctTicks.Count-1];
             float logGap = Mathf.Log(gap, 15);
-            int level = StwFluencyLevel();
+            int level = FluencyLevel(correctTicks);
             waitTime = (long)Mathf.Pow(15, level + 1) - gap;
         }
         return waitTime;
     }
+
+    public int FluencyLevel(bool wts) {
+        if (wts) return FluencyLevel(wtsCorrectTicks);
+        else return FluencyLevel(stwCorrectTicks);
+    }
+    public long LevelUpWaitTime(bool wts) {
+        if (wts) return LevelUpWaitTime(wtsCorrectTicks);
+        else return LevelUpWaitTime(stwCorrectTicks);
+    }
+
 
 
     // need a should learn next.
