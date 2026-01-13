@@ -30,26 +30,51 @@ public class Sign {
         return gaps;
     }
 
-    public List<float> LogGaps(List<long> gaps) {
-        List<float> logGaps = new List<float>();
-        foreach (float gap in gaps) {
-            logGaps.Add(Mathf.Log(gap, 15));
+    public int GapToLevel(long gap) {
+        int[] levels = {20, 60, 300, 3600};
+        int logValue = 12*3600;
+        int level = 0;
+        for (int i = 0; i < levels.Length; i++) {
+            if (gap > levels[i]) {
+                level = i+1;
+            }
         }
-        return logGaps;
+        if (gap > logValue) {
+            level = (int)Mathf.Log(gap / (logValue), 2) + levels.Length + 1;
+        }
+        return level;
+    }
+
+    public long GapToWaitTime(int level, long gap) {
+        int[] levels = {20, 60, 300, 3600};
+        int logValue = 12*3600;
+        long nextLevelGap = (long)Mathf.Pow(level - levels.Length, 2) * logValue;
+        if (level < levels.Length) {
+            nextLevelGap = levels[level];
+        }
+        return nextLevelGap - gap;
+    }
+
+    public List<int> GapLevels(List<long> gaps) {
+        List<int> gapLevels = new List<int>();
+        foreach (long gap in gaps) {
+            gapLevels.Add(GapToLevel(gap));
+        }
+        return gapLevels;
     }
 
     public int FluencyLevel(List<long> correctTicks) {
         int fluencyLevel = 0;
         int nLevels = 10;
-        int levelCountThreshold = 2;
-        List<float> logGaps = LogGaps(TickGaps(correctTicks));
+        int levelCountThreshold = 1;
+        List<int> gapLevels = GapLevels(TickGaps(correctTicks));
         List<int> levels = new List<int>();
         for (int i = 0; i < nLevels; i++) {
             levels.Add(0);
         }
-        foreach (float gap in logGaps) {
+        foreach (int level in gapLevels) {
             for (int i = 0; i < nLevels; i++) {
-                if (gap > i) {
+                if (level >= i) {
                     levels[i]++;
                     if (levels[i] >= levelCountThreshold && fluencyLevel < i) {
                         fluencyLevel = i;
@@ -62,11 +87,9 @@ public class Sign {
 
     public long LevelUpWaitTime(List<long> correctTicks) {
         long waitTime = 0;
-        if (correctTicks.Count > 1) {
+        if (correctTicks.Count > 0) {
             long gap = DateTime.Now.Ticks/10000000 - correctTicks[correctTicks.Count-1];
-            float logGap = Mathf.Log(gap, 15);
-            int level = FluencyLevel(correctTicks);
-            waitTime = (long)Mathf.Pow(15, level + 1) - gap;
+            waitTime = GapToWaitTime(FluencyLevel(correctTicks), gap);
         }
         return waitTime;
     }
